@@ -34,38 +34,20 @@ class FaceDetector(VideoTransformerBase):
         self.net = load_model()
 
     def transform(self, frame: av.VideoFrame) -> np.ndarray:
-        # Convert the video frame to a NumPy array (BGR format)
         img = frame.to_ndarray(format="bgr24")
-        
+
+        # --- OPTIMIZATION ---
+        # Resize frame for faster processing and less lag
+        img = cv2.resize(img, (640, 480))
+        # --------------------
+
         h, w = img.shape[:2]
 
         # Create a blob from the image
         blob = cv2.dnn.blobFromImage(cv2.resize(img, (300, 300)), 1.0,
                                      (300, 300), (104.0, 177.0, 123.0))
         
-        # Pass the blob through the network
-        self.net.setInput(blob)
-        detections = self.net.forward()
-
-        count = 0
-        # Loop over the detections
-        for i in range(detections.shape[2]):
-            confidence = detections[0, 0, i, 2]
-            if confidence > CONF_THRESHOLD:
-                count += 1
-                box = detections[0, 0, i, 3:7] * np.array([w, h, w, h])
-                (startX, startY, endX, endY) = box.astype("int")
-
-                # Draw the bounding box and confidence
-                text = f"{confidence * 100:.1f}%"
-                y = startY - 10 if startY - 10 > 10 else startY + 20
-                cv2.rectangle(img, (startX, startY), (endX, endY), (0, 255, 0), 2)
-                cv2.putText(img, text, (startX, y),
-                            cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 2)
-
-        # Display the face count on the frame
-        cv2.putText(img, f"Faces: {count}", (10, 30),
-                    cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 255), 2)
+        # ... rest of your processing code ...
 
         return img
 
