@@ -32,6 +32,7 @@ CONF_THRESHOLD = st.slider("Confidence Threshold", 0.0, 1.0, 0.5, 0.05)
 class FaceDetector(VideoTransformerBase):
     def __init__(self):
         self.net = load_model()
+
     def transform(self, frame: av.VideoFrame) -> np.ndarray:
         # Convert the video frame to a NumPy array (BGR format)
         img = frame.to_ndarray(format="bgr24")
